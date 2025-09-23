@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  username         String   @unique
+  name             String?
+  bio              String?
+  age              Int?
+  location         String?
+  avatar           String?
+  interests        String[]
+  password         String?
+  profileComplete  Boolean? @default(false)
+
+  // OAuth fields
+  provider     String?
+  providerId   String?
+
+  // Reputation system
+  reputation Int @default(0)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdGroups     Group[]      @relation("GroupCreator")
+  groupMemberships  GroupMember[]
+  sentMessages      Message[]
+  sentFeedback      Feedback[]   @relation("FeedbackSender")
+  receivedFeedback  Feedback[]   @relation("FeedbackReceiver")
+  createdEvents     Event[]      @relation("EventCreator")
+  eventAttendances  EventAttendance[]
+
+  @@map("users")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  date        DateTime
+  time        String?
+  location    String
+  category    String
+  price       Float?
+  capacity    Int?
+  imageUrl    String?
+  externalUrl String?
+
+  status      EventStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creatorId String
+  creator   User   @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  groups      Group[]
+  attendances EventAttendance[]
+
+  @@map("events")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  maxMembers  Int      @default(10)
+  isPublic    Boolean  @default(true)
+  status      GroupStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creatorId String
+  creator   User   @relation("GroupCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  members   GroupMember[]
+  messages  Message[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String @id @default(cuid())
+  role     GroupRole @default(MEMBER)
+  status   MemberStatus @default(PENDING)
+  joinedAt DateTime @default(now())
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  senderId String
+  sender   User   @relation("FeedbackSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User   @relation("FeedbackReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  groupId String?
+  eventId String?
+
+  @@unique([senderId, receiverId, groupId])
+  @@map("feedback")
+}
+
+model EventAttendance {
+  id        String   @id @default(cuid())
+  attended  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("event_attendances")
+}
+
+enum EventStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum GroupStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum GroupRole {
+  ADMIN
+  MEMBER
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  KICKED
+}
+
+
