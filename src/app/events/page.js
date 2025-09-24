@@ -1,9 +1,10 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Dialog, Transition } from '@headlessui/react';
 
 export default function EventsPage() {
   const { data: session, status } = useSession();
@@ -12,17 +13,38 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    }
-  }, [status, router]);
+  // --- MODAL STATE AND HANDLERS ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    location: '',
+    category: '',
+    price: '',
+    capacity: '',
+    imageUrl: '',
+    externalUrl: '',
+  });
+  const [formError, setFormError] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
 
-  useEffect(() => {
-    if (session) {
-      fetchEvents();
-    }
-  }, [session]);
+  const handleOpenModal = () => setIsModalOpen(true);
+  
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setFormError('');
+    // Reset form data upon closing
+    setFormData({
+      title: '', description: '', date: '', time: '', location: '', category: '', price: '', capacity: '', imageUrl: '', externalUrl: '',
+    });
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const fetchEvents = async () => {
     try {
@@ -43,6 +65,49 @@ export default function EventsPage() {
     }
   };
 
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setFormLoading(true);
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setFormError(errorData.error || 'Failed to create event');
+        return;
+      }
+      
+      handleCloseModal();
+      await fetchEvents(); // Re-fetch events after successful creation
+    } catch (err) {
+      console.error("Event creation error:", err);
+      setFormError('An internal error occurred while creating the event.');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+  // -----------------------------------------------------------
+
+  // Redirect if unauthenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    }
+  }, [status, router]);
+
+  // Fetch events when session is ready
+  useEffect(() => {
+    if (session) {
+      fetchEvents();
+    }
+  }, [session]);
+
+  // Loading state for Next-Auth session
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -55,18 +120,19 @@ export default function EventsPage() {
     return null;
   }
 
+  // Loading state for API events fetch
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-300 rounded w-1/4 mb-6"></div>
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white p-6 rounded-lg shadow">
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
                   </div>
                 ))}
               </div>
@@ -133,7 +199,7 @@ export default function EventsPage() {
                 {session?.user?.image ? (
                   <img
                     src={session.user.image}
-                    alt={session.user.name}
+                    alt={session.user.name || 'User'}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -168,7 +234,7 @@ export default function EventsPage() {
               <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Discover Events</h1>
               <p className="text-lg text-gray-700 dark:text-gray-200">Find exciting events and connect with like-minded people</p>
             </div>
-            <button className="mt-4 md:mt-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all flex items-center space-x-2">
+            <button onClick={handleOpenModal} className="mt-4 md:mt-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all flex items-center space-x-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
@@ -220,7 +286,7 @@ export default function EventsPage() {
                 Be the first to create an event and invite others to join you!
               </p>
               <div className="mt-6">
-                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all flex items-center space-x-2 mx-auto">
+                <button onClick={handleOpenModal} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all flex items-center space-x-2 mx-auto">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                   </svg>
@@ -277,6 +343,138 @@ export default function EventsPage() {
           )}
         </div>
       </main>
+
+      {/* --- Create Event Modal --- */}
+      <Transition appear show={isModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={handleCloseModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-2xl font-bold leading-6 text-gray-900 dark:text-white mb-4 border-b pb-2 dark:border-gray-700"
+                  >
+                    Create New Event
+                  </Dialog.Title>
+                  
+                  {formError && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                      <span className="block sm:inline">{formError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                        <input type="text" name="title" id="title" required value={formData.title} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+                      </div>
+                      <div>
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                        <input type="text" name="location" id="location" required value={formData.location} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                      <textarea name="description" id="description" rows="3" required value={formData.description} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"></textarea>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                        <input type="date" name="date" id="date" required value={formData.date} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+                      </div>
+                      <div>
+                        <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
+                        <input type="time" name="time" id="time" required value={formData.time} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
+                      </div>
+                      <div>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                        <select name="category" id="category" required value={formData.category} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                            <option value="">Select Category</option>
+                            <option value="outdoor">Outdoor</option>
+                            <option value="technology">Technology</option>
+                            <option value="community">Community</option>
+                            <option value="fitness">Fitness</option>
+                            <option value="arts">Arts & Culture</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Price (e.g. 10.00 or Free)</label>
+                            <input type="text" name="price" id="price" value={formData.price} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="0.00 or Free" />
+                        </div>
+                        <div>
+                            <label htmlFor="capacity" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity (optional)</label>
+                            <input type="number" name="capacity" id="capacity" value={formData.capacity} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="e.g., 50" />
+                        </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image URL (optional)</label>
+                      <input type="url" name="imageUrl" id="imageUrl" value={formData.imageUrl} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="https://example.com/event.jpg" />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="externalUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300">External RSVP Link (optional)</label>
+                      <input type="url" name="externalUrl" id="externalUrl" value={formData.externalUrl} onChange={handleFormChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="https://external-rsvp-link.com" />
+                    </div>
+
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        className="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        onClick={handleCloseModal}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={formLoading}
+                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {formLoading ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Creating...
+                          </>
+                        ) : 'Create Event'}
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }
