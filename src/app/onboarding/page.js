@@ -6,8 +6,11 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
+
+
 export default function OnboardingPage() {
   const { data: session, status } = useSession();
+  
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -23,9 +26,21 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
+ 
+
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/');
+
+    if (status === 'unauthenticated') {
+      router.push('/');
+      return;
+    }
+    
     if (status === 'authenticated' && session?.user) {
+      // redirect if profileComplete
+      if (session.user.profileComplete === true) {
+        router.push('/dashboard');
+        return;
+      }
       setForm((prev) => ({
         ...prev,
         name: prev.name || session.user.name || '',
@@ -161,7 +176,7 @@ export default function OnboardingPage() {
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div className="p-6 md:p-8 border-b border-gray-100 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Let's set up your profile</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Lets set up your profile</h1>
                 <p className="text-gray-600 mt-1">Answer a few quick questions to get started</p>
               </div>
               <div className="hidden md:block text-sm text-gray-500">

@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Home, 
-  Users, 
-  Calendar as CalendarIcon, 
-  Settings, 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Home,
+  Users,
+  Calendar as CalendarIcon,
+  Settings,
   Sparkles,
   User,
   MapPin,
   Heart,
-  FileText
-} from 'lucide-react';
+  FileText,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -28,17 +28,17 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState(null);
   const [userData, setUserData] = useState(null);
   const [form, setForm] = useState({
-    name: '',
-    username: '',
-    age: '',
-    location: '',
-    interests: '',
-    bio: ''
+    name: "",
+    username: "",
+    age: "",
+    location: "",
+    interests: "",
+    bio: "",
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
     }
   }, [status, router]);
 
@@ -51,27 +51,27 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('../../api/users/profile');
-      
+      const response = await fetch("../../api/users/profile");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        throw new Error("Failed to fetch user data");
       }
 
       const userData = await response.json();
       setUserData(userData);
-      
+
       // Initialize form with user data
       setForm({
-        name: userData.name || '',
-        username: userData.username || '',
-        age: userData.age || '',
-        location: userData.location || '',
-        interests: userData.interests ? userData.interests.join(', ') : '',
-        bio: userData.bio || ''
+        name: userData.name || "",
+        username: userData.username || "",
+        age: userData.age || "",
+        location: userData.location || "",
+        interests: userData.interests ? userData.interests.join(", ") : "",
+        bio: userData.bio || "",
       });
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to load profile data. Please try again later.');
+      console.error("Error fetching user data:", error);
+      setError("Failed to load profile data. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -79,9 +79,9 @@ export default function ProfilePage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -90,54 +90,57 @@ export default function ProfilePage() {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    
+
     try {
       // Process interests from comma-separated string to array
       const processedForm = {
         ...form,
-        interests: form.interests.split(',').map(item => item.trim()).filter(Boolean)
+        interests: form.interests
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
       };
-      
-      const response = await fetch('/api/users/profile', {
-        method: 'PUT',
+
+      const response = await fetch("/api/users/profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(processedForm),
       });
-      
+
       // Handle different response scenarios
       if (!response.ok) {
         // For non-200 responses, handle without trying to parse JSON
-        setError('Failed to update profile. Please try again.');
+        setError("Failed to update profile. Please try again.");
         return;
       }
-      
+
       try {
         const responseData = await response.json();
         setUserData(responseData);
-        setSuccess('Profile updated successfully!');
+        setSuccess("Profile updated successfully!");
         setIsEditing(false);
       } catch (jsonError) {
-        setError('Error processing server response. Please try again.');
+        setError("Error processing server response. Please try again.");
       }
-      
+
       // Show success message for 3 seconds
       setTimeout(() => {
         setSuccess(null);
       }, 3000);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      setError('Failed to update profile. Please try again.');
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === 'loading' || loading && !userData) {
+  if (status === "loading" || (loading && !userData)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] dark:bg-[#0f172a]">
-        <motion.div 
+        <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           className="rounded-full h-12 w-12 border-t-4 border-b-4 border-violet-600"
@@ -149,7 +152,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0f172a]">
       {/* Navbar */}
-      <motion.nav 
+      <motion.nav
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white dark:bg-[#1e293b] border-b border-[#e2e8f0] dark:border-[#334155] sticky top-0 z-10"
@@ -158,7 +161,7 @@ export default function ProfilePage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/dashboard" className="flex items-center space-x-2">
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-8 h-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-lg flex items-center justify-center"
@@ -170,32 +173,44 @@ export default function ProfilePage() {
                 </span>
               </Link>
             </div>
-            
+
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/dashboard" className="text-[#64748b] hover:text-violet-600 font-medium flex items-center space-x-1 relative">
+              <Link
+                href="/dashboard"
+                className="text-[#64748b] hover:text-violet-600 font-medium flex items-center space-x-1 relative"
+              >
                 <Home className="h-5 w-5" />
                 <span>Dashboard</span>
               </Link>
-              <Link href="/events" className="text-[#64748b] hover:text-violet-600 font-medium flex items-center space-x-1 relative">
+              <Link
+                href="/events"
+                className="text-[#64748b] hover:text-violet-600 font-medium flex items-center space-x-1 relative"
+              >
                 <CalendarIcon className="h-5 w-5" />
                 <span>Events</span>
               </Link>
-              <Link href="/groups" className="text-[#64748b] hover:text-violet-600 font-medium flex items-center space-x-1 relative">
+              <Link
+                href="/groups"
+                className="text-[#64748b] hover:text-violet-600 font-medium flex items-center space-x-1 relative"
+              >
                 <Users className="h-5 w-5" />
                 <span>Groups</span>
               </Link>
-              <Link href="/dashboard/profile" className="text-violet-600 font-medium flex items-center space-x-1 relative">
+              <Link
+                href="/dashboard/profile"
+                className="text-violet-600 font-medium flex items-center space-x-1 relative"
+              >
                 <User className="h-5 w-5" />
                 <span>Profile</span>
-                <motion.div 
+                <motion.div
                   layoutId="nav-indicator"
                   className="absolute -bottom-1 left-0 right-0 h-0.5 bg-violet-600"
                 ></motion.div>
               </Link>
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <motion.button 
+              <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="p-2 text-[#64748b] hover:text-violet-600 rounded-full hover:bg-[#f1f5f9] dark:hover:bg-[#334155] transition-colors duration-200"
@@ -211,26 +226,29 @@ export default function ProfilePage() {
                   className="h-8 w-8 rounded-full object-cover ring-2 ring-violet-200 dark:ring-violet-800"
                 />
               ) : (
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   className="h-8 w-8 rounded-full bg-violet-100 dark:bg-violet-900 flex items-center justify-center ring-2 ring-violet-200 dark:ring-violet-800"
                 >
-                  <User size={16} className="text-violet-600 dark:text-violet-300" />
+                  <User
+                    size={16}
+                    className="text-violet-600 dark:text-violet-300"
+                  />
                 </motion.div>
               )}
             </div>
           </div>
         </div>
       </motion.nav>
-      
+
       {/* Back button */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1 }}
         className="max-w-4xl mx-auto px-4 py-4"
       >
-        <motion.button 
+        <motion.button
           whileHover={{ x: -3 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => router.back()}
@@ -240,44 +258,47 @@ export default function ProfilePage() {
           <span>Back</span>
         </motion.button>
       </motion.div>
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         className="container mx-auto px-4 py-4 max-w-4xl"
       >
-        <motion.div 
+        <motion.div
           whileHover={{ y: -2 }}
           transition={{ type: "spring", stiffness: 300 }}
           className="bg-white dark:bg-[#1e293b] rounded-xl shadow-lg overflow-hidden"
         >
           {/* Profile header */}
           <div className="h-48 bg-gradient-to-r from-violet-500 to-fuchsia-500 relative">
-            <motion.div 
+            <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
               className="absolute -bottom-16 left-8"
             >
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="h-32 w-32 rounded-full border-4 border-white dark:border-[#1e293b] bg-[#f1f5f9] flex items-center justify-center overflow-hidden shadow-lg"
               >
                 {userData?.avatar ? (
-                  <img
-                    src={userData.avatar}
-                    alt={userData.name}
-                    className="h-full w-full object-cover"
-                  />
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={userData.avatar}
+                      alt={userData.name || "User Avatar"}
+                      fill // this makes it fill the parent div
+                      className="object-cover rounded-full"
+                    />
+                  </div>
                 ) : (
                   <User size={64} className="text-violet-300" />
                 )}
               </motion.div>
             </motion.div>
-          
+
             {/* Edit/Save button */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
@@ -304,16 +325,16 @@ export default function ProfilePage() {
               )}
             </motion.div>
           </div>
-        
+
           {/* Profile content */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
             className="pt-20 px-8 pb-8"
           >
             {success && (
-              <motion.div 
+              <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -322,9 +343,9 @@ export default function ProfilePage() {
                 {success}
               </motion.div>
             )}
-            
+
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -333,14 +354,14 @@ export default function ProfilePage() {
                 {error}
               </motion.div>
             )}
-            
+
             {isEditing ? (
-              <motion.form
-                onSubmit={handleSubmit}
-                className="space-y-6"
-              >
+              <motion.form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 500 }}>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 500 }}
+                  >
                     <label className="block text-sm font-medium text-[#334155] dark:text-[#e2e8f0] mb-1">
                       Name
                     </label>
@@ -352,8 +373,11 @@ export default function ProfilePage() {
                       className="w-full px-4 py-2 border border-[#e2e8f0] dark:border-[#475569] rounded-lg focus:ring-violet-500 focus:border-violet-500 dark:bg-[#1e293b] dark:text-white shadow-sm transition-all duration-200"
                     />
                   </motion.div>
-                  
-                  <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 500 }}>
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 500 }}
+                  >
                     <label className="block text-sm font-medium text-[#334155] dark:text-[#e2e8f0] mb-1">
                       Username
                     </label>
@@ -365,8 +389,11 @@ export default function ProfilePage() {
                       className="w-full px-4 py-2 border border-[#e2e8f0] dark:border-[#475569] rounded-lg focus:ring-violet-500 focus:border-violet-500 dark:bg-[#1e293b] dark:text-white shadow-sm transition-all duration-200"
                     />
                   </motion.div>
-                  
-                  <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 500 }}>
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 500 }}
+                  >
                     <label className="block text-sm font-medium text-[#334155] dark:text-[#e2e8f0] mb-1">
                       Age
                     </label>
@@ -378,8 +405,11 @@ export default function ProfilePage() {
                       className="w-full px-4 py-2 border border-[#e2e8f0] dark:border-[#475569] rounded-lg focus:ring-violet-500 focus:border-violet-500 dark:bg-[#1e293b] dark:text-white shadow-sm transition-all duration-200"
                     />
                   </motion.div>
-                  
-                  <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 500 }}>
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 500 }}
+                  >
                     <label className="block text-sm font-medium text-[#334155] dark:text-[#e2e8f0] mb-1">
                       Location
                     </label>
@@ -391,9 +421,9 @@ export default function ProfilePage() {
                       className="w-full px-4 py-2 border border-[#e2e8f0] dark:border-[#475569] rounded-lg focus:ring-violet-500 focus:border-violet-500 dark:bg-[#1e293b] dark:text-white shadow-sm transition-all duration-200"
                     />
                   </motion.div>
-                  
-                  <motion.div 
-                    whileHover={{ y: -2 }} 
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
                     transition={{ type: "spring", stiffness: 500 }}
                     className="md:col-span-2"
                   >
@@ -409,9 +439,9 @@ export default function ProfilePage() {
                       placeholder="e.g. hiking, music, photography"
                     />
                   </motion.div>
-                  
-                  <motion.div 
-                    whileHover={{ y: -2 }} 
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
                     transition={{ type: "spring", stiffness: 500 }}
                     className="md:col-span-2"
                   >
@@ -430,7 +460,7 @@ export default function ProfilePage() {
                 </div>
               </motion.form>
             ) : (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -443,21 +473,21 @@ export default function ProfilePage() {
                   className="mb-4"
                 >
                   <h1 className="text-2xl font-bold text-[#0f172a] dark:text-white">
-                    {userData?.name || 'Your Name'}
+                    {userData?.name || "Your Name"}
                   </h1>
                   <p className="text-[#64748b] dark:text-[#94a3b8]">
-                    @{userData?.username || 'username'}
+                    @{userData?.username || "username"}
                   </p>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 >
                   {userData?.age && (
-                    <motion.div 
+                    <motion.div
                       whileHover={{ x: 3 }}
                       className="flex items-center gap-2 text-[#475569] dark:text-[#cbd5e1]"
                     >
@@ -465,9 +495,9 @@ export default function ProfilePage() {
                       <span>{userData.age} years old</span>
                     </motion.div>
                   )}
-                  
+
                   {userData?.location && (
-                    <motion.div 
+                    <motion.div
                       whileHover={{ x: 3 }}
                       className="flex items-center gap-2 text-[#475569] dark:text-[#cbd5e1]"
                     >
@@ -476,7 +506,7 @@ export default function ProfilePage() {
                     </motion.div>
                   )}
                 </motion.div>
-                
+
                 {userData?.interests && userData.interests.length > 0 && (
                   <motion.div
                     initial={{ y: 10, opacity: 0 }}
@@ -499,12 +529,14 @@ export default function ProfilePage() {
                           </motion.span>
                         ))
                       ) : (
-                        <span className="text-[#64748b] dark:text-[#94a3b8]">No interests added yet</span>
+                        <span className="text-[#64748b] dark:text-[#94a3b8]">
+                          No interests added yet
+                        </span>
                       )}
                     </div>
                   </motion.div>
                 )}
-                
+
                 {userData?.bio && (
                   <motion.div
                     initial={{ y: 10, opacity: 0 }}

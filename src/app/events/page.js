@@ -165,8 +165,8 @@ export default function EventsPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Discover Events</h1>
-              <p className="text-gray-600 dark:text-gray-300">Find exciting events and connect with like-minded people</p>
+              <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">Discover Events</h1>
+              <p className="text-lg text-gray-700 dark:text-gray-200">Find exciting events and connect with like-minded people</p>
             </div>
             <button className="mt-4 md:mt-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md transition-all flex items-center space-x-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -231,7 +231,7 @@ export default function EventsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event) => (
-                <div key={event.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+                <div key={event.id} className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden transform transition-all duration-200 hover:shadow-xl hover:-translate-y-1 border border-gray-200 dark:border-gray-800">
                   {event.imageUrl && (
                     <div className="relative">
                       <img
@@ -239,33 +239,33 @@ export default function EventsPage() {
                         alt={event.title}
                         className="w-full h-48 object-cover"
                       />
-                      <div className="absolute top-0 right-0 m-2 px-2 py-1 bg-indigo-600 text-white text-xs font-bold rounded">
+                      <div className="absolute top-0 right-0 m-2 px-2 py-1 bg-indigo-700 text-white text-xs font-bold rounded shadow">
                         {event.category}
                       </div>
                     </div>
                   )}
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+                      <span className="inline-block bg-indigo-100 text-indigo-900 text-xs px-3 py-1 rounded-full font-semibold">
                         {event.category}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-base text-gray-700 dark:text-gray-300 font-medium">
                         {new Date(event.date).toLocaleDateString()}
                       </span>
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                       {event.title}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-md text-gray-700 dark:text-gray-200 mb-4 line-clamp-2">
                       {event.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
+                      <span className="text-base text-gray-600 dark:text-gray-400 font-semibold">
                         📍 {event.location}
                       </span>
                       <Link
                         href={`/events/${event.id}`}
-                        className="text-indigo-600 hover:text-indigo-700 font-medium"
+                        className="text-indigo-700 hover:text-purple-700 font-bold underline underline-offset-2 transition-colors"
                       >
                         View Details →
                       </Link>
