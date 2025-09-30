@@ -39,6 +39,8 @@ model User {
   receivedFeedback  Feedback[]   @relation("FeedbackReceiver")
   createdEvents     Event[]      @relation("EventCreator")
   eventAttendances  EventAttendance[]
+  joinRequests      JoinRequest[] @relation("RequestSender")
+  notifications     Notification[] @relation("NotificationReceiver")
 
   @@map("users")
 }
@@ -66,6 +68,8 @@ model Event {
 
   groups      Group[]
   attendances EventAttendance[]
+  joinRequests JoinRequest[]
+  notifications Notification[]
 
   @@map("events")
 }
@@ -179,6 +183,58 @@ enum MemberStatus {
   APPROVED
   REJECTED
   KICKED
+}
+
+model JoinRequest {
+  id        String   @id @default(cuid())
+  status    RequestStatus @default(PENDING)
+  message   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation("RequestSender", fields: [userId], references: [id], onDelete: Cascade)
+  
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  notifications Notification[]
+
+  @@unique([userId, eventId])
+  @@map("join_requests")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  userId    String
+  user      User     @relation("NotificationReceiver", fields: [userId], references: [id], onDelete: Cascade)
+  
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  
+  requestId String?
+  request   JoinRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  JOIN_REQUEST
+  REQUEST_APPROVED
+  REQUEST_REJECTED
+  EVENT_UPDATE
 }
 
 
