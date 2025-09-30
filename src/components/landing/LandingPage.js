@@ -3,14 +3,11 @@
 import { useState } from 'react';
 import Navbar from './Navbar';
 import Hero from './Hero';
+import HowItWorks from './HowItWorks';
+import AuthModal from '../AuthModal';
 import Features from './Features';
 import EventCategories from './EventCategories';
-import Testimonials from './Testimonials';
-import Stats from './Stats';
-import HowItWorks from './HowItWorks';
-import CTA from './CTA';
 import Footer from './Footer';
-import AuthModal from '../AuthModal';
 
 const LandingPage = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -27,14 +24,13 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white">
       <Navbar onAuthModalOpen={handleAuthModalOpen} />
       <Hero onAuthModalOpen={handleAuthModalOpen} />
-      <Features />
-      <EventCategories />
-      <Testimonials />
-      <Stats />
+      <Features/>
       <HowItWorks />
-      <CTA onAuthModalOpen={handleAuthModalOpen} />
-      <Footer />
+      
+      <EventCategories/>
+       <Footer/>
       <AuthModal isOpen={isAuthModalOpen} onClose={handleAuthModalClose} />
+     
     </div>
   );
 };
