@@ -65,3 +65,15 @@ textarea:focus-visible {
     border: 1px solid rgba(255, 255, 255, 0.18);
   }
 }
+
+/* Example for globals.css */
+@keyframes fadeInSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1; /* Sets it to visible at the end */
+    transform: translateY(0);
+  }
+}

@@ -205,7 +205,7 @@ export default function Dashboard() {
                 Browse Events
               </Link>
               <Link
-                href="/events/create" // Added a link to create an event
+                href="/events" // Added a link to create an event
                 className="inline-flex items-center px-6 py-3 border border-white text-white rounded-full hover:bg-white/20 transition-colors font-semibold"
               >
                 <Plus className="w-4 h-4 mr-2" />
