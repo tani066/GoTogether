@@ -27,8 +27,7 @@ export async function GET(request, { params }) {
     // Fetch participants (users who have approved attendance)
     const participants = await prisma.eventAttendance.findMany({
       where: {
-        eventId: id,
-        status: 'APPROVED'
+        eventId: id
       },
       select: {
         user: {
@@ -44,9 +43,38 @@ export async function GET(request, { params }) {
         }
       }
     });
+    
+    // Also include the event creator (admin)
+    const eventWithCreator = await prisma.event.findUnique({
+      where: { id },
+      select: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+            location: true,
+            bio: true,
+            interests: true
+          }
+        }
+      }
+    });
 
     // Format the response
     const formattedParticipants = participants.map(attendance => attendance.user);
+    
+    // Add the creator to the participants list if not already included
+    if (eventWithCreator && eventWithCreator.creator) {
+      const creatorExists = formattedParticipants.some(p => p.id === eventWithCreator.creator.id);
+      if (!creatorExists) {
+        formattedParticipants.push({
+          ...eventWithCreator.creator,
+          isAdmin: true
+        });
+      }
+    }
 
     return NextResponse.json({ participants: formattedParticipants });
   } catch (error) {
