@@ -2,18 +2,31 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import LandingPage from '@/components/landing/LandingPage';
+import LandingIntro from '@/components/landing/LandingIntro';
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/onboarding');
     }
   }, [status, router]);
+
+  useEffect(() => {
+    // Show intro for 5 seconds, then transition to landing page
+    if (showIntro) {
+      const timer = setTimeout(() => {
+        setShowIntro(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showIntro]);
 
   if (status === 'authenticated') {
     return (
@@ -24,6 +37,12 @@ export default function Home() {
   }
 
   return (
-    <LandingPage />
+    <>
+      {showIntro ? (
+        <LandingIntro />
+      ) : (
+        <LandingPage />
+      )}
+    </>
   );
 }
