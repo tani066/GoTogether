@@ -34,10 +34,16 @@ module.exports = {
           900: '#581c87',
         },
       },
+      // Added for the custom font
+      fontFamily: {
+        display: ['Inter', 'sans-serif'],
+      },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'gradient-x': 'gradientX 3s ease infinite',
+        // Added for the slow background gradient
+        'gradient-xy': 'gradient-xy 10s ease infinite',
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-slow': 'bounce 3s infinite',
       },
@@ -59,6 +65,17 @@ module.exports = {
             'background-size': '200% 200%',
             'background-position': 'right center'
           }
+        },
+        // Added keyframes for the slow background gradient
+        'gradient-xy': {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center',
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center',
+          },
         },
       },
     },

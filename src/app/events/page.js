@@ -5,7 +5,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Dialog, Transition } from '@headlessui/react';
-import { Search, Filter, Plus, Calendar, MapPin, Tag, Euro, Users, Globe, Image, X, Loader2 } from 'lucide-react';
+import { Search, Filter, Plus, Calendar, MapPin, Tag, IndianRupee, Users, Globe, Image, X, Loader2 } from 'lucide-react';
 
 // Common input styles for re-use
 const inputClasses = "mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white transition-colors p-2.5 text-sm";
@@ -286,8 +286,8 @@ export default function EventsPage() {
                             {event.location}
                           </span>
                           <span className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                            <Euro className='w-4 h-4 mr-2 text-green-500' />
-                            {event.price || 'Free'}
+                            <IndianRupee className='w-4 h-4 mr-2 text-green-500' />
+                            {event.price ? `₹${event.price}` : 'Free'}
                           </span>
                         </div>
                       </div>
@@ -388,7 +388,7 @@ export default function EventsPage() {
                         <div>
                             <label htmlFor="price" className={labelClasses}>Price (e.g., 10.00 or Free)</label>
                             <div className="relative">
-                                <Euro className='w-4 h-4 absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400'/>
+                                <IndianRupee className='w-4 h-4 absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400'/>
                                 <input type="text" name="price" id="price" value={formData.price} onChange={handleFormChange} className={`${inputClasses} pl-10`} placeholder="0.00 or Free" />
                             </div>
                         </div>

@@ -11,7 +11,7 @@ const CalendarIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" classNa
 const ClockIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
 const LocationIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.707A10.134 10.134 0 0112 19c-5.523 0-10-4.477-10-10S6.477 0 12 0s10 4.477 10 10c0 1.468-.318 2.871-.908 4.144L12 21.018l-5.748-4.311A9.957 9.957 0 0012 17a9.957 9.957 0 005.657-.293z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12a2 2 0 100-4 2 2 0 000 4z" /></svg>);
 const TagIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 21V9a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 11H8m6 0h-2m2 4h-4m4 4H8m0-12V5a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>);
-const DollarIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15a4 4 0 01-4-4v-4a4 4 0 118 0v4a4 4 0 01-4 4z" /></svg>);
+const RupeeIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
 const CapacityIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857m0 0a5.002 5.002 0 019.288 0M12 10a5 5 0 100-10 5 5 0 000 10z" /></svg>);
 const LinkIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>);
 
@@ -76,7 +76,7 @@ export default function EventDetailsPage({ params }) {
     if (session && id) {
       fetchEventDetails();
     }
-  }, [session, id]);
+  }, [session, id, fetchEventDetails]);
 
   const fetchEventDetails = async () => {
     try {
@@ -218,48 +218,66 @@ export default function EventDetailsPage({ params }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
-                className="relative w-full h-80"
+                className="relative w-full h-96"
             >
                 <img 
                     src={event.imageUrl} 
                     alt={event.title} 
                     className="w-full h-full object-cover" 
                 />
-                 <div className="absolute inset-0 bg-black/30"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-8">
+                    <motion.span 
+                        className="inline-block px-4 py-1.5 text-sm font-bold text-white bg-indigo-600/80 rounded-full mb-4 shadow-lg tracking-wider backdrop-blur-sm"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 300, delay: 0.2 }}
+                    >
+                        {event.category.toUpperCase() || 'UNCATEGORIZED'}
+                    </motion.span>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 leading-tight drop-shadow-md">
+                        {event.title}
+                    </h1>
+                </div>
             </motion.div>
           ) : (
-            <div className="w-full h-64 bg-indigo-500/80 dark:bg-indigo-900/80 flex items-center justify-center">
-                <p className="text-white text-2xl font-semibold">Image Placeholder</p>
+            <div className="w-full h-80 bg-gradient-to-r from-indigo-600 to-purple-700 flex items-center justify-center">
+                <div className="text-center p-8">
+                    <motion.span 
+                        className="inline-block px-4 py-1.5 text-sm font-bold text-white bg-white/20 rounded-full mb-4 backdrop-blur-sm"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 300, delay: 0.2 }}
+                    >
+                        {event.category.toUpperCase() || 'UNCATEGORIZED'}
+                    </motion.span>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 leading-tight">
+                        {event.title}
+                    </h1>
+                </div>
             </div>
           )}
 
           <div className="p-8 md:p-12">
             
-            {/* Title and Description */}
+            {/* Description */}
             <header className="mb-10 border-b pb-6 dark:border-gray-700">
-                <motion.span 
-                    className="inline-block px-4 py-1.5 text-sm font-bold text-indigo-700 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 rounded-full mb-4 shadow-md tracking-wider"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, delay: 0.2 }}
-                >
-                    {event.category.toUpperCase() || 'UNCATEGORIZED'}
-                </motion.span>
-                <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight">
-                    {event.title}
-                </h1>
+                <div className="flex items-center mb-6">
+                    <div className="h-10 w-1 bg-indigo-600 mr-3 rounded-full"></div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">About This Event</h2>
+                </div>
                 <p className="text-xl text-gray-600 dark:text-gray-300 font-light leading-relaxed">
                     {event.description}
                 </p>
             </header>
 
             {/* Event Details Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
                 <DetailItem label="Date" value={new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} icon={CalendarIcon} />
                 <DetailItem label="Time" value={event.time} icon={ClockIcon} />
                 <DetailItem label="Location" value={event.location} icon={LocationIcon} />
                 <DetailItem label="Category" value={event.category} icon={TagIcon} />
-                <DetailItem label="Price" value={event.price || 'Free'} icon={DollarIcon} />
+                <DetailItem label="Price" value={event.price ? `₹${event.price}` : 'Free'} icon={RupeeIcon} />
                 <DetailItem label="Capacity" value={event.capacity || 'Unlimited'} icon={CapacityIcon} />
                 {event.externalUrl && (
                     <DetailItem label="RSVP Link" value={event.externalUrl} isLink icon={LinkIcon} />

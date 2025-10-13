@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { 
   Sparkles, 
   LayoutDashboard, // Use specific icons for better context
@@ -109,9 +110,11 @@ export default function DashboardNavbar() {
               title={session?.user?.name || 'Profile'}
             >
               {session?.user?.image ? (
-                <img
+                <Image
                   src={session.user.image}
                   alt={session.user.name || 'User'}
+                  width={36}
+                  height={36}
                   className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
                 />
               ) : (

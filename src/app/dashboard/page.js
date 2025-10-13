@@ -7,10 +7,10 @@ import { motion } from 'framer-motion';
 import YourEventsSection from '../../components/events/yourEvents';
 import Link from 'next/link';
 import { ArrowRight, Calendar, Heart, Plus, Star, Users, Briefcase, TrendingUp, Check } from 'lucide-react'; // Added more icons for flexibility
+import { useToast } from '@/components/ui/Toast';
+import Image from 'next/image';
 
-// --- CONSTANTS/HELPERS (Outside the component for better performance) ---
 
-// Animation for fade-in and scale-up effect
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 12 } },
@@ -51,6 +51,7 @@ const statCardData = (totalEvents, createdEvents, upcomingEvents, favoriteEvents
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { addToast } = useToast();
   const [events, setEvents] = useState([]);
   const [acceptedEvents, setAcceptedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -102,12 +103,86 @@ export default function Dashboard() {
     }
   };
 
-  // --- STUB HANDLERS ---
-  const handleEditEvent = (event) => { console.log('Edit event:', event); };
-  const handleDeleteEvent = async (event) => { console.log('Delete event:', event); };
-  const handleViewRequests = (event) => { console.log('View requests for event:', event); };
-  const handleAcceptRequest = async (request) => { console.log('Accept request:', request); };
-  const handleRejectRequest = async (request) => { console.log('Reject request:', request); };
+  // --- EVENT MANAGEMENT HANDLERS ---
+  const handleEditEvent = (event) => { 
+    // Use replace instead of push to ensure a full page reload
+    window.location.href = `/events/${event.id}/edit`;
+  };
+  
+  const handleDeleteEvent = async (event) => { 
+    // Remove confirm dialog and use toast directly
+    try {
+      addToast(`Deleting event "${event.title}"...`, 'info');
+      
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        // Refresh events list after deletion
+        fetchEvents();
+        addToast('Event deleted successfully!', 'success');
+      } else {
+        const errorData = await response.json();
+        addToast(errorData.error || 'Failed to delete event. Please try again.', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      addToast('An error occurred while deleting the event.', 'error');
+    }
+  };
+  
+  const handleViewRequests = (event) => { 
+    // Use direct location change instead of router.push
+    window.location.href = `/events/${event.id}/requests`;
+  };
+  
+  const handleAcceptRequest = async (request) => {
+    try {
+      const response = await fetch(`/api/join-requests/${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'APPROVED' }),
+      });
+      
+      if (response.ok) {
+        addToast('Request accepted successfully!', 'success');
+        return true;
+      } else {
+        addToast('Failed to accept request. Please try again.', 'error');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      addToast('An error occurred while accepting the request.', 'error');
+      return false;
+    }
+  };
+  
+  const handleRejectRequest = async (request) => {
+    try {
+      const response = await fetch(`/api/join-requests/${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'REJECTED' }),
+      });
+      
+      if (response.ok) {
+        addToast('Request rejected successfully!', 'success');
+        return true;
+      } else {
+        addToast('Failed to reject request. Please try again.', 'error');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      addToast('An error occurred while rejecting the request.', 'error');
+      return false;
+    }
+  };
 
   // --- LOADING / GUARD CLAUSES ---
   if (status === 'loading') {
@@ -257,7 +332,7 @@ export default function Dashboard() {
                 >
                   <Link href={`/events/${event.id}`}>
                     {event.imageUrl
-                      ? <img src={event.imageUrl} alt={event.title} className="h-48 w-full object-cover" />
+                      ? <Image src={event.imageUrl} alt={event.title} width={500} height={300}className="h-48 w-full object-cover" />
                       : <div className="h-48 w-full bg-gradient-to-tr from-indigo-500 to-fuchsia-500 flex items-center justify-center">
                           <Star className="w-12 h-12 text-white opacity-50" />
                         </div>
@@ -319,7 +394,7 @@ export default function Dashboard() {
 
         {/* ======================= EVENTS YOU'VE JOINED ======================= */}
         <div className="mt-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Events You've Joined</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Events You&apos;ve Joined</h2>
           {acceptedEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {acceptedEvents.map((event, index) => (
@@ -333,7 +408,8 @@ export default function Dashboard() {
                 >
                   <Link href={`/events/${event.id}`}>
                     {event.imageUrl
-                      ? <img src={event.imageUrl} alt={event.title} className="h-48 w-full object-cover" />
+                      ? <Image src={event.imageUrl} alt={event.title} width={500} height={300}className="h-48 w-full object-cover" 
+/>
                       : <div className="h-48 w-full bg-gradient-to-tr from-green-500 to-teal-500 flex items-center justify-center">
                           <Check className="w-12 h-12 text-white opacity-50" />
                         </div>
@@ -371,7 +447,7 @@ export default function Dashboard() {
               <div className="w-16 h-16 bg-green-50 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">You Haven't Joined Any Events Yet</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">You Haven&apos;t Joined Any Events Yet</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-6">Browse events and send join requests to get started!</p>
               <Link
                 href="/events"
