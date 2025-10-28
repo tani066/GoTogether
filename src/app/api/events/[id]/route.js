@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = await params;
+  const { id } = params;
   try {
     const event = await prisma.event.findUnique({
       where: { id },
@@ -27,8 +27,25 @@ export async function GET(request, { params }) {
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
-    return NextResponse.json({ event });
+
+    // Determine if the current user is joined (creator or attendee)
+    const isCreator = event.creatorId === session.user.id;
+    let isAttendee = false;
+    if (!isCreator) {
+      const attendance = await prisma.eventAttendance.findUnique({
+        where: {
+          userId_eventId: {
+            userId: session.user.id,
+            eventId: id,
+          },
+        },
+      });
+      isAttendee = Boolean(attendance);
+    }
+
+    return NextResponse.json({ event: { ...event, isUserJoined: isCreator || isAttendee } });
   } catch (error) {
+    console.error('Error fetching event details by id:', error);
     return NextResponse.json({ error: 'Failed to fetch event details' }, { status: 500 });
   }
 }

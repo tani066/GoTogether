@@ -3,18 +3,21 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/events - Get all events
+// GET /api/events - Get all events (or only those created by the current user when ?creator=true)
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    // Fetch events from the database
+
+    const { searchParams } = new URL(request.url);
+    const creatorOnly = searchParams.get('creator') === 'true';
+
+    const where = creatorOnly ? { creatorId: session.user.id } : undefined;
+
     const events = await prisma.event.findMany({
+      where,
       include: {
         attendances: true,
         groups: true,
@@ -24,10 +27,7 @@ export async function GET(request) {
     return NextResponse.json({ events });
   } catch (error) {
     console.error('Error fetching events:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch events' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
   }
 }
 

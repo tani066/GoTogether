@@ -14,6 +14,7 @@ import {
   Loader2 // Used a more modern spinner
 } from 'lucide-react';
 import DashboardNavbar from '@/layouts/DashboardNavbar'; // Assuming this component exists
+import { useToast } from '@/components/ui/Toast';
 
 // --- Component: GroupsPage (Main) ---
 
@@ -27,6 +28,7 @@ export default function GroupsPage() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const { addToast } = useToast();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -43,9 +45,12 @@ export default function GroupsPage() {
       if (response.ok) {
         const data = await response.json();
         setCreatedEvents(data.events || []);
+      } else {
+        addToast('Failed to fetch created events', 'error');
       }
     } catch (error) {
       console.error('Error fetching created events:', error);
+      addToast('Failed to fetch created events', 'error');
     }
   }, []);
 
@@ -56,9 +61,12 @@ export default function GroupsPage() {
       if (response.ok) {
         const data = await response.json();
         setJoinedEvents(data.events || []);
+      } else {
+        addToast('Failed to fetch joined events', 'error');
       }
     } catch (error) {
       console.error('Error fetching joined events:', error);
+      addToast('Failed to fetch joined events', 'error');
     } finally {
       setLoading(false);
     }
@@ -72,9 +80,12 @@ export default function GroupsPage() {
       if (response.ok) {
         const data = await response.json();
         setParticipants(data.participants || []);
+      } else {
+        addToast('Failed to fetch participants', 'error');
       }
     } catch (error) {
       console.error('Error fetching event participants:', error);
+      addToast('Failed to fetch participants', 'error');
     } finally {
       setLoadingParticipants(false);
     }

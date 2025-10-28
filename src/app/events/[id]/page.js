@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use} from 'react';
+import { useEffect, useState, useCallback ,use} from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
@@ -72,13 +72,7 @@ export default function EventDetailsPage({ params }) {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session && id) {
-      fetchEventDetails();
-    }
-  }, [session, id, fetchEventDetails]);
-
-  const fetchEventDetails = async () => {
+  const fetchEventDetails = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/events/${id}`);
@@ -112,7 +106,13 @@ export default function EventDetailsPage({ params }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (session && id) {
+      fetchEventDetails();
+    }
+  }, [session, id, fetchEventDetails]);
 
   const handleJoinEvent = async () => {
     setJoinLoading(true);
