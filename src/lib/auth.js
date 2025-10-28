@@ -1,9 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma';
 
 export const authOptions = {
   providers: [
@@ -74,16 +72,20 @@ export const authOptions = {
     async session({ session, token }) {
       if (!session?.user?.email) return session;
 
-      // Fetch user from DB
-      const dbUser = await prisma.user.findUnique({
-        where: { email: session.user.email },
-      });
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+        });
 
-      if (dbUser) {
-        session.user.id = dbUser.id;
-        session.user.username = dbUser.username;
-        session.user.reputation = dbUser.reputation;
-        session.user.profileComplete = dbUser.profileComplete; // ✅ add to session
+        if (dbUser) {
+          session.user.id = dbUser.id;
+          session.user.username = dbUser.username;
+          session.user.reputation = dbUser.reputation;
+          session.user.profileComplete = dbUser.profileComplete;
+        }
+      } catch (err) {
+        console.error('Prisma session lookup failed:', err);
+        // Gracefully proceed without DB-enriched fields
       }
 
       return session;

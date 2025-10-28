@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -29,18 +29,7 @@ export default function EditEventPage({ params }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-      return;
-    }
-
-    if (session) {
-      fetchEventDetails();
-    }
-  }, [session, id, status, router, fetchEventDetails]);
-
-  const fetchEventDetails = async () => {
+  const fetchEventDetails = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/events/${id}`);
@@ -79,7 +68,18 @@ export default function EditEventPage({ params }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, session, addToast, router]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (session) {
+      fetchEventDetails();
+    }
+  }, [session, id, status, router, fetchEventDetails]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
