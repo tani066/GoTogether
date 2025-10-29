@@ -54,9 +54,9 @@ export default function DashboardNavbar() {
           <div className="flex items-center flex-shrink-0">
             <Link href="/dashboard" className="flex items-center space-x-2 group">
               {/* Refined Icon: Vibrant, use Teal as the secondary brand color */}
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-teal-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-indigo-500/50 transition-shadow duration-300">
-                <Sparkles className="w-5 h-5 text-white transform group-hover:rotate-12 transition-transform duration-500" />
-              </div>
+               <div>
+            <Image src="/logo.png" alt="My Logo" width={30} height={30} />
+            </div>
               {/* Text: Bold, high-contrast gradient */}
               <span className="text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-teal-500 bg-clip-text text-transparent tracking-tight">
                 GoTogether

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight, Menu, X } from 'lucide-react';
+import Image from 'next/image';
 
 const Navbar = ({ onAuthModalOpen }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,9 +17,9 @@ const Navbar = ({ onAuthModalOpen }) => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-3"
           >
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            <div>
+      <Image src="/logo.png" alt="My Logo" width={30} height={30} />
+    </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               GoTogether
             </span>

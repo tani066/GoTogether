@@ -1,6 +1,7 @@
 'use client';
 
 import { Sparkles, Twitter, Instagram, Facebook, Linkedin, Github } from 'lucide-react';
+import Image from 'next/image';
 
 const Footer = () => {
   return (
@@ -9,9 +10,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+               <div>
+      <Image src="/logo.png" alt="My Logo" width={30} height={30} />
+    </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 GoTogether
               </span>
